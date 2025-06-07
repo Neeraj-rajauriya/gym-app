@@ -135,3 +135,17 @@ export const resetPassword = async (req, res) => {
       .json({ success: false, msg: "Invalid email or password" });
   }
 };
+
+
+export const getAllUser=async(req,res)=>{
+  try{
+     const allUsers=await user.find({});
+     res.json({success:true,message:"ALl users",allUsers});
+  }
+  catch (err) {
+    console.log("Internal Server Error", err.message);
+    return res
+      .status(401)
+      .json({ success: false, msg: "Invalid email or password" });
+  }
+}

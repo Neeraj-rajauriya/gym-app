@@ -27,9 +27,9 @@ export default function Login() {
       if (response.data.success) {
         toast.success("Login successful! Redirecting...");
         localStorage.setItem("token", response.data.token);
-        // setTimeout(() => {
-        //   router.push("/dashboard");
-        // }, 2000);
+        setTimeout(() => {
+          router.push("/membership/all");
+        }, 2000);
         setForm({ email: "", password: "" });
       } else {
         toast.error(response.data.msg || "Login failed");

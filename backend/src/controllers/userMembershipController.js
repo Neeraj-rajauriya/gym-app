@@ -6,6 +6,7 @@ import sendMail from "../utils/sendMail.js";
 export const createMembership = async (req, res) => {
   try {
     const { membershipPlanId } = req.body;
+    console.log("membershipPlanId",membershipPlanId)
     const userId = req.user._id;
     const plan = await MembershipPlan.findById(membershipPlanId);
     if (!plan) {
@@ -106,7 +107,7 @@ export const getUserMembership = async (req, res) => {
 
 export const getAllUserMembership = async (req, res) => {
   try {
-    const membership = await userMembership.find({}).populate("userId","name").populate("membershipPlanId","name");
+    const membership = await userMembership.find({}).populate("userId","name role").populate("membershipPlanId","name");
     res
       .status(200)
       .json({ Success: true, message: "All user membership", membership });

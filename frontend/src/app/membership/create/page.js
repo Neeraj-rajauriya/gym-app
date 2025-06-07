@@ -5,6 +5,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
+
 const allowedRoles = ['admin', 'recruiter'];
 
 export default function CreateMembershipPlan() {

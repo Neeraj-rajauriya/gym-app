@@ -6,33 +6,26 @@ import { MembershipPlan } from "../models/membership.model.js";
 export const createPayment = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { userMembershipId, amount } = req.body;
-    const membership = await userMembership
-      .findById(userMembershipId)
-      .populate("membershipPlanId");
-    if (!membership) {
-      return res
-        .status(404)
-        .json({ Success: false, message: "Membership Not Found!" });
+    const { membershipPlanId, amount } = req.body;
+    const plan=await MembershipPlan.findById(membershipPlanId);
+    if (!plan) {
+      return res.status(404).json({ success: false, message: "Membership Plan Not Found!" });
     }
-
-    const planAmount = membership.membershipPlanId.price;
-    if (amount !== planAmount) {
-      return res.status(400).json({ Success: true, message: "Invalid amount" });
+    if (amount !== plan.price) {
+      return res.status(400).json({ success: false, message: "Invalid amount" });
     }
     const newPayment = await payment.create({
       userId,
-      userMembershipId,
+      membershipPlanId,
       amount,
       status: "Pending",
+      paymentMethod: "Razorpay", 
     });
-    console.log("newPayment is", newPayment);
-    res
-      .status(201)
-      .json({ Success: true, message: "Payment Initiated", newPayment });
+    res.status(201).json({success:true,message:"Payment Initiated",newPayment});
+    console.log("Payment initiated:", newPayment);
   } catch (err) {
     console.log("Error", err.message);
-    res.status(500).json({ Success: false, message: "Internal Server Error" });
+    res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
 
@@ -49,7 +42,7 @@ export const updatePaymentStatus = async (req, res) => {
     }
     existingPayment.status = status;
     await existingPayment.save();
-    if (existingPayment.status === "Success") {
+    if (existingPayment.status === "success") {
       const membership = await userMembership
         .findById(existingPayment.userMembershipId)
         .populate("membershipPlanId");
@@ -58,20 +51,20 @@ export const updatePaymentStatus = async (req, res) => {
       endDate.setMonth(
         startDate.getMonth() + membership.membershipPlanId.duration
       );
-      membership.paymentStatus = "Success";
+      membership.paymentStatus = "success";
       membership.startDate = startDate;
       membership.endDate = endDate;
 
       await membership.save();
     }
     res.status(200).json({
-      Success: true,
+      success: true,
       message: "Payment Updated Successfully",
       existingPayment,
     });
   } catch (err) {
     console.log("Error", err.message);
-    res.status(500).json({ Success: false, message: "Internal Server Error" });
+    res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
 
@@ -90,7 +83,7 @@ export const getAllpayment = async (req, res) => {
       .json({ Sucess: true, message: "All Payments Fetched", payments });
   } catch (err) {
     console.log("Error", err.message);
-    res.status(500).json({ Success: false, message: "Internal Server Error" });
+    res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
 
@@ -104,12 +97,12 @@ export const getUserPayment = async (req, res) => {
     if (!getPayment) {
       return res
         .status(404)
-        .json({ Success: false, message: "Payment not found!" });
+        .json({ success: false, message: "Payment not found!" });
     }
-    res.status(200).json({ Success: true, getPayment });
+    res.status(200).json({ success: true, getPayment });
   } catch (err) {
     console.log("Error", err.message);
-    res.status(500).json({ Success: false, message: "Internal Server Error" });
+    res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
 
@@ -126,11 +119,11 @@ export const getPaymentById = async (req, res) => {
     if (!getPayment) {
       return res
         .status(404)
-        .json({ Success: false, message: "Paymemt not found" });
+        .json({ success: false, message: "Paymemt not found" });
     }
-    res.status(200).json({ Success: true, getPayment });
+    res.status(200).json({ success: true, getPayment });
   } catch (err) {
     console.log("Error", err.message);
-    res.status(500).json({ Success: false, message: "Internal Server Error" });
+    res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };

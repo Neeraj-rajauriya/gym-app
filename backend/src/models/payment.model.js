@@ -6,6 +6,11 @@ const paymentSchema = new mongoose.Schema({
     ref: "Users",
     require: true,
   },
+  membershipPlanId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "MembershipPlan",
+    required: true,
+  },
   userMembershipId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "UserMembership",
