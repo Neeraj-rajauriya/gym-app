@@ -4,15 +4,16 @@ const workoutSchema = new mongoose.Schema(
   {
     title: {
       type: String,
-      require: true,
+      required: true,
+      unique:true
     },
     goal: {
       type: String,
-      enum: ["Weight Loss", "Muscle Gain", "Endurance", "Flexibility"],
+      // enum: ["Weight Loss", "Muscle Gain", "Endurance", "Flexibility"],
     },
     difficulty: {
       type: String,
-      enum: ["Beginner", "Intermediate", "Advance"],
+      enum: ["beginner", "intermediate", "advanced"],
       required: true,
     },
     exercises: [
@@ -25,7 +26,7 @@ const workoutSchema = new mongoose.Schema(
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "user",
-      require: true,
+      required: true,
     },
   },
   { timestamps: true }

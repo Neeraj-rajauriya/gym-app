@@ -6,18 +6,19 @@ export const createWorkout = async (req, res) => {
   try {
     const userId = req.user._id;
     const { title, goal, difficulty, exercises } = req.body;
+    console.log("req body", req.body);
     const newWorkout = await workout.create({
-      title,
-      goal,
-      difficulty,
-      exercises,
-      createdBy: userId,
+       title,
+       goal,
+       difficulty,
+       exercises,
+       createdBy:userId,
     });
     res
       .status(200)
       .json({ Success: true, message: "New Workout Created", newWorkout });
   } catch (err) {
-    console.log("Error", err.message);
+    console.log("Error is", err.message);
     res.status(500).json({ Success: false, message: "Internal Server Error" });
   }
 };
@@ -37,7 +38,7 @@ export const getAllWorkout = async (req, res) => {
 export const getWorkoutById = async (req, res) => {
   try {
     const { id } = req.params;
-    const workout = await workout.findById(id);
+    const getWorkout = await workout.findById(id);
     if (!workout) {
       return res
         .status(404)
@@ -45,7 +46,7 @@ export const getWorkoutById = async (req, res) => {
     }
     res
       .status(200)
-      .json({ Success: true, message: "Workout fetched", workout });
+      .json({ Success: true, message: "Workout fetched", getWorkout });
   } catch (err) {
     console.log("Error", err.message);
     res.status(500).json({ Success: false, message: "Internal Server Error" });
@@ -159,15 +160,33 @@ export const assignedWorkoutToUser = async (req, res) => {
       html
     );
 
-    res
-      .status(200)
-      .json({
-        Success: true,
-        message: "Workout Assigned! and email sent to user",
-        updateUser,
-      });
+    res.status(200).json({
+      Success: true,
+      message: "Workout Assigned! and email sent to user",
+      updateUser,
+    });
   } catch (err) {
     console.log("error", err.message);
     res.status(500).json({ Success: false, message: "Internal Server Error" });
   }
 };
+
+
+export const searchWorkout=async(req,res)=>{
+try{
+  const { name } = req.query;
+  if (!name) {
+      return res.status(400).json({ success: false, message: "Name query parameter is required" });
+  }
+  const foundWorkout = await workout.findOne({ title: new RegExp(name, "i") });
+  console.log("workout is",foundWorkout);
+  if (foundWorkout) {
+    res.status(200).json({ Success:true,foundWorkout });
+  } else {
+    res.status(404).json({ Success:false,message:"workout not found"});
+  }
+}catch(err){
+  console.log("error", err.message);
+  res.status(500).json({ Success: false, message: "Internal Server Error" });
+}
+}

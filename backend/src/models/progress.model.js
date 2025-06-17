@@ -33,7 +33,7 @@ const progressSchema = new mongoose.Schema(
     commentedBy:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"Users",
-        required:true
+        // required:true
     }
   },
   { timestamps: true }

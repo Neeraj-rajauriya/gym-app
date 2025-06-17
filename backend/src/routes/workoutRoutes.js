@@ -6,6 +6,7 @@ import {
   deleteworkOut,
   assignedWorkoutToUser,
   getWorkoutById,
+  searchWorkout
 } from "../controllers/workoutController.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { roleMiddleware } from "../middleware/role.middleware.js";
@@ -18,6 +19,12 @@ workoutRouter.post(
   createWorkout
 );
 workoutRouter.get("/", authMiddleware, getAllWorkout);
+workoutRouter.get(
+  "/search",
+  authMiddleware,
+  roleMiddleware("admin", "trainer"),
+  searchWorkout
+);
 workoutRouter.put(
   "/:id",
   authMiddleware,
@@ -37,5 +44,6 @@ workoutRouter.patch(
   assignedWorkoutToUser
 );
 workoutRouter.get("/:id", authMiddleware, getWorkoutById);
+
 
 export default workoutRouter;

@@ -5,6 +5,7 @@ import {
   getDietPlan,
   deleteDietPlan,
   assignDietToUser,
+  updateDietplan
 } from "../controllers/dietContoller.js";
 
 import { authMiddleware } from "../middleware/auth.middleware.js";
@@ -19,6 +20,7 @@ dietPlanRouter.post(
 );
 dietPlanRouter.get("/", authMiddleware, getAllDietPlan);
 dietPlanRouter.get("/:id", authMiddleware, getDietPlan);
+dietPlanRouter.patch("/:id", authMiddleware,roleMiddleware('admin','trainer'), updateDietplan);
 dietPlanRouter.delete(
   "/:id",
   authMiddleware,

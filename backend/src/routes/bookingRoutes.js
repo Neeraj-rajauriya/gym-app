@@ -5,12 +5,16 @@ import {
   getBookingByTrainer,
   getBookingByuser,
   updateBookingStatus,
+  getTrainers ,
+  checkSlotAvailability
 } from "../controllers/booking.controller.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { roleMiddleware } from "../middleware/role.middleware.js";
 
 const bookingRouter = express.Router();
 bookingRouter.post("/", authMiddleware, createBooking);
+bookingRouter.get('/trainers', authMiddleware, getTrainers);
+bookingRouter.get('/availability', authMiddleware, checkSlotAvailability);
 bookingRouter.get(
   "/trainer/:id",
   authMiddleware,

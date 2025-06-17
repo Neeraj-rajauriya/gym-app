@@ -49,7 +49,7 @@ export const createBooking = async (req, res) => {
         </div>
         <p style="font-size: 16px; color: #333;">Please log in to your dashboard to accept or reject the booking.</p>
         <div style="text-align: center; margin-top: 30px;">
-          <a href="https://your-app-dashboard.com/dashboard" style="background: #3498DB; color: #fff; padding: 12px 30px; border-radius: 30px; text-decoration: none; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: background 0.3s ease;">
+          <a href="http://localhost:3000/booking" style="background: #3498DB; color: #fff; padding: 12px 30px; border-radius: 30px; text-decoration: none; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: background 0.3s ease;">
             🔗 Go to Dashboard
           </a>
         </div>
@@ -196,3 +196,40 @@ export const deleteBooking=async(req,res)=>{
     res.status(500).json({ Success: false, message: "Internal Server Error" });
   }
 }
+
+
+export const getTrainers = async (req, res) => {
+  try {
+    const trainers = await user.find({ role: "trainer" }).select('name email');
+    res.status(200).json({ Success: true, trainers });
+  } catch (err) {
+    console.log(err.message);
+    res.status(500).json({ Success: false, message: "Internal Server Error" });
+  }
+};
+
+
+// Add to your booking.controller.js
+export const checkSlotAvailability = async (req, res) => {
+  try {
+
+    console.log("checkSlotAvailability calling",checkSlotAvailability)
+    const { trainerId, date } = req.query;
+    
+    const bookedSlots = await booking.find({
+      trainer: trainerId,
+      date: date,
+      status: { $in: ['pending', 'confirmed'] }
+    }).select('timeSlot -_id');
+    
+    const bookedSlotValues = bookedSlots.map(slot => slot.timeSlot);
+    
+    res.status(200).json({ 
+      success: true, 
+      bookedSlots: bookedSlotValues 
+    });
+  } catch (err) {
+    console.log(err.message);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};

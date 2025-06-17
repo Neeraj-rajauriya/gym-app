@@ -8,9 +8,19 @@ dotenv.config();
 export const registerUser = async (req, res) => {
   try {
     const { name, email, phone, password, age, gender, role } = req.body;
+    if (role === 'admin') {
+      const adminExists = await user.findOne({ role: 'admin' });
+      if (adminExists) {
+        return res.status(403).json({ 
+          success: false, 
+          msg: "Admin already exists. Only one admin account is allowed." 
+        });
+      }
+    }
     const existingUser = await user.countDocuments({ email });
     if (existingUser > 0) {
       res.status(200).json({ success: false, msg: "User Already Exist" });
+      return;
     }
     const newPassword = await bcrypt.hash(password, 10);
     const newUser = await user.create({
@@ -20,7 +30,7 @@ export const registerUser = async (req, res) => {
       password: newPassword,
       age,
       gender,
-      role,
+      role:role || 'user',
     });
     return res.status(200).send({ success: true, newUser });
   } catch (err) {
@@ -68,7 +78,6 @@ export const forgotPassword = async (req, res) => {
     });
     // const resetLink = `http://localhost:4000/reset-password/${token}`;
     const resetLink = `http://localhost:3000/auth/reset-password?token=${token}`;
-
 
     await sendMail(
       email,
@@ -136,16 +145,59 @@ export const resetPassword = async (req, res) => {
   }
 };
 
-
-export const getAllUser=async(req,res)=>{
-  try{
-     const allUsers=await user.find({});
-     res.json({success:true,message:"ALl users",allUsers});
-  }
-  catch (err) {
+export const getAllUser = async (req, res) => {
+  try {
+    const allUsers = await user.find({});
+    res.json({ success: true, message: "ALl users", allUsers });
+  } catch (err) {
     console.log("Internal Server Error", err.message);
     return res
       .status(401)
       .json({ success: false, msg: "Invalid email or password" });
   }
-}
+};
+
+export const getUserByEmail = async (req, res) => {
+  try {
+    const { email } = req.query;
+    if (!email) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Email query parameter is required" });
+    }
+    const exists = await user.findOne({ email });
+    if (!exists) {
+      return res
+        .status(404)
+        .json({ Success: false, message: "User not found" });
+    }
+    res.status(200).json({ Success: true, message: "User found", exists });
+  } catch (err) {
+    console.log("Internal Server Error", err.message);
+    return res
+      .status(401)
+      .json({ success: false, msg: "Invalid email or password" });
+  }
+};
+
+
+export const checkAdminExists = async (req, res) => {
+  try {
+    // Check database for any admin users
+    const adminCount = await user.countDocuments({ role: 'admin' });
+    
+    return res.status(200).json({ 
+      success: true,
+      exists: adminCount > 0,
+      count: adminCount
+    });
+    
+  } catch (err) {
+    console.error('Admin check error:', err.message);
+    return res.status(500).json({ 
+      success: false,
+      error: "Server error while checking admin status",
+      message: err.message
+    });
+  }
+};
