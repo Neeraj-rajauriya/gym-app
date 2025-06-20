@@ -192,41 +192,6 @@ export default function AllMembershipPlans() {
     }
   };
 
-  const handleBuy = async (plan) => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      showToast("You must be logged in to make a payment.", "error");
-      return;
-    }
-
-    showToast(`Initiating payment for ${plan.name}...`, "success");
-
-    try {
-      const res = await fetch("http://localhost:4000/api/payment", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          membershipPlanId: plan._id,
-          amount: plan.price,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (data.Success) {
-        showToast(`Payment initiated successfully for ${plan.name}`, "success");
-      } else {
-        showToast(data.message || "Payment initiation failed", "error");
-      }
-    } catch (error) {
-      console.error("Payment initiation error:", error);
-      showToast("Server error during payment initiation", "error");
-    }
-  };
-
   useEffect(() => {
     fetchPlans();
   }, []);
@@ -616,15 +581,16 @@ export default function AllMembershipPlans() {
     </div>
   );
 }
-
 // "use client";
-
+// export const dynamic = "force-dynamic";
 // import { useEffect, useState } from "react";
 // import { motion, AnimatePresence } from "framer-motion";
 // import { jwtDecode } from "jwt-decode";
 // import PaymentInitiate from "@/app/payment/Initiate/page";
+// import { useRouter } from "next/navigation";
 
 // export default function AllMembershipPlans() {
+//   const router = useRouter();
 //   const [plans, setPlans] = useState([]);
 //   const [loading, setLoading] = useState(true);
 //   const [deletingId, setDeletingId] = useState(null);
@@ -639,6 +605,7 @@ export default function AllMembershipPlans() {
 //     duration: "",
 //   });
 //   const [updateLoading, setUpdateLoading] = useState(false);
+//   const API_URL=process.env.NEXT_PUBLIC_API_URL
 
 //   // Toast notifications state
 //   const [toast, setToast] = useState(null);
@@ -655,6 +622,10 @@ export default function AllMembershipPlans() {
 //   const showToast = (message, type = "error") => {
 //     setToast({ message, type });
 //     setTimeout(() => setToast(null), 3000);
+//   };
+
+//   const handleCreateMembership = () => {
+//     router.push("/membership/create");
 //   };
 
 //   const fetchPlans = async () => {
@@ -815,7 +786,7 @@ export default function AllMembershipPlans() {
 //     showToast(`Initiating payment for ${plan.name}...`, "success");
 
 //     try {
-//       const res = await fetch("http://localhost:4000/api/payment", {
+//       const res = await fetch(`${API_URL}/payment`, {
 //         method: "POST",
 //         headers: {
 //           "Content-Type": "application/json",
@@ -873,6 +844,20 @@ export default function AllMembershipPlans() {
 //             Choose the perfect plan for your fitness journey
 //           </motion.p>
 //         </div>
+
+//         {/* Admin Create Button */}
+//         {isAdmin && (
+//           <div className="flex justify-end mb-8">
+//             <motion.button
+//               onClick={handleCreateMembership}
+//               className="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-medium rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105"
+//               whileHover={{ scale: 1.05 }}
+//               whileTap={{ scale: 0.95 }}
+//             >
+//               Create New Membership
+//             </motion.button>
+//           </div>
+//         )}
 
 //         {/* Toast Notification */}
 //         <AnimatePresence>
@@ -939,6 +924,16 @@ export default function AllMembershipPlans() {
 //             <p className="mt-1 text-gray-400">
 //               There are currently no membership plans available.
 //             </p>
+//             {isAdmin && (
+//               <div className="mt-6">
+//                 <button
+//                   onClick={handleCreateMembership}
+//                   className="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-medium rounded-lg shadow transition-all"
+//                 >
+//                   Create New Membership
+//                 </button>
+//               </div>
+//             )}
 //           </motion.div>
 //         ) : (
 //           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">

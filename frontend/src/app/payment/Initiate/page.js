@@ -1,49 +1,78 @@
 "use client";
+export const dynamic = "force-dynamic";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
-export default function PaymentInitiate({ plan, onSuccess, onError }) {
+function PaymentInitiateContent({ plan: propPlan }) {
   const [loading, setLoading] = useState(false);
+  const [plan, setPlan] = useState(propPlan || null);
+  const [error, setError] = useState(null);
   const router = useRouter();
-   console.log("plan is",plan);
-  // Helper function to delay for given milliseconds
-  const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+  const searchParams = useSearchParams();
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+  useEffect(() => {
+    // If plan is passed as prop, use that
+    if (propPlan) {
+      setPlan(propPlan);
+      return;
+    }
+
+    // Otherwise try to get from search params
+    const planId = searchParams.get("planId");
+    if (!planId) {
+      setError("Plan ID is missing");
+      return;
+    }
+
+    const fetchPlan = async () => {
+      try {
+        const res = await fetch(`${API_URL}/membership/${planId}`);
+        const data = await res.json();
+        if (data.success) {
+          setPlan(data.plan);
+        } else {
+          setError(data.message || "Failed to load plan details");
+        }
+      } catch (err) {
+        setError("Failed to fetch plan details");
+        console.error(err);
+      }
+    };
+
+    fetchPlan();
+  }, [searchParams, API_URL, propPlan]);
 
   const handlePayment = async () => {
+    if (!plan) return;
+    
     setLoading(true);
     const token = localStorage.getItem("token");
 
     if (!token) {
-      onError("You must be logged in to make a payment.");
+      setError("You must be logged in to make a payment.");
       setLoading(false);
       return;
     }
 
     try {
-      // Run fetch and delay in parallel to ensure minimum 2 seconds loading
-      const [res] = await Promise.all([
-        fetch("http://localhost:4000/api/payment", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            membershipPlanId: plan._id,
-            amount: plan.price,
-          }),
+      const res = await fetch(`${API_URL}/payment`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          membershipPlanId: plan._id,
+          amount: plan.price,
         }),
-        delay(2000), // 2 seconds delay
-      ]);
+      });
 
       const data = await res.json();
 
       if (data.success) {
         const paymentId = data.newPayment._id;
-
-        onSuccess(`Payment initiated successfully for ${plan.name}`);
-
         router.push(
           `/payment/paymentCreate?paymentId=${paymentId}&token=${token}&name=${
             plan.name
@@ -54,32 +83,48 @@ export default function PaymentInitiate({ plan, onSuccess, onError }) {
           }&membershipPlanId=${plan._id}`
         );
       } else {
-        onError(data.message || "Payment initiation failed");
+        setError(data.message || "Payment initiation failed");
       }
     } catch (error) {
-        console.log("err",error.message);
-      onError("Server error during payment initiation");
+      setError("Server error during payment initiation");
       console.error(error);
     } finally {
       setLoading(false);
     }
   };
 
+  if (error) {
+    return <div className="p-4 text-red-500">{error}</div>;
+  }
+
+  if (!plan) {
+    return <div className="p-4">Loading plan details...</div>;
+  }
+
   return (
-    <button
-      onClick={handlePayment}
-      disabled={loading}
-      className={`mt-auto px-4 py-2 rounded-md bg-green-600 text-white font-semibold hover:bg-green-700 transition mb-4 ${
-        loading ? "opacity-50 cursor-not-allowed" : ""
-      }`}
-    >
-      {loading
-        ? "Initiating Payment..."
-        : `Buy ${plan.name} for ₹${plan.price}`}
-    </button>
+    <div className="p-4">
+      <button
+        onClick={handlePayment}
+        disabled={loading || !plan}
+        className={`mt-auto px-4 py-2 rounded-md bg-green-600 text-white font-semibold hover:bg-green-700 transition mb-4 ${
+          loading ? "opacity-50 cursor-not-allowed" : ""
+        }`}
+      >
+        {loading
+          ? "Initiating Payment..."
+          : `Buy ${plan.name} for ₹${plan.price}`}
+      </button>
+    </div>
   );
 }
 
+export default function PaymentInitiate({ plan }) {
+  return (
+    <Suspense fallback={<div className="p-4">Loading payment page...</div>}>
+      <PaymentInitiateContent plan={plan} />
+    </Suspense>
+  );
+}
 // import { useState } from 'react';
 
 // export default function PaymentInitiate({ plan, onSuccess, onError }) {

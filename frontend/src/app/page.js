@@ -1,4 +1,5 @@
 'use client';
+export const dynamic = "force-dynamic";
 import React, { useEffect, useState } from 'react';
 import { FaUser, FaDumbbell, FaChartLine, FaClipboardList, FaArrowRight, FaUtensils } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';

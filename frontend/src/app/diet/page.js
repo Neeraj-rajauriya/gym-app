@@ -398,7 +398,7 @@
 // }.
 
 "use client";
-
+export const dynamic = "force-dynamic";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Head from "next/head";
@@ -444,6 +444,8 @@ export default function DietPlanPage() {
     fetchPlans();
   }, []);
 
+  const API_URL=process.env.NEXT_PUBLIC_API_URL;
+  console.log("API url is",API_URL);
   const fetchPlans = async () => {
     setLoading(true);
     try {

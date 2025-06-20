@@ -1,5 +1,5 @@
 'use client'
-
+export const dynamic = "force-dynamic";
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Head from 'next/head';
@@ -56,6 +56,7 @@ const AssignDietPlan = () => {
       });
       
       const data = await res.json();
+      console.log("API URL is..",process.env.NEXT_PUBLIC_API_URL);
       console.log("Data is",data)
 ;
       if (!res.ok) {
