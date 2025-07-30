@@ -35,7 +35,7 @@ function ResetPasswordComponent() {
         setNewPassword("");
         setConfirmPassword("");
         setTimeout(() => {
-          router.push("/login");
+          router.push("/auth/login");
         }, 3000);
       } else {
         toast.error(res.data.message || "Reset failed");
